@@ -56,10 +56,10 @@ export default {
         },
 
         handleInputChange({ target }) {
-            let file = target.files[0]; //getting file [0] this means if user has selected multiple files then get first one only
+            let file = target.files[0];
             if (file) {
-                let fileName = file.name; //getting file name
-                if (fileName.length >= 20) { //if file name length is greater than 12 then split it and add ...
+                let fileName = file.name;
+                if (fileName.length >= 50) {
                     this.$vs.notification({
                         icon: `<box-icon name='error-circle' color='white'></box-icon>`,
                         duration: 4000,
@@ -67,9 +67,13 @@ export default {
                         color: "danger",
                         position: "top-center",
                         title: "Error",
-                        text: 'File name must be between 1-20'
+                        text: 'File name must be between 1-50'
                     });
                     return
+                }
+                if (fileName.length >= 13) {
+                    let splitName = fileName.split('.');
+                    fileName = splitName[0].substring(0, 13) + "... ." + splitName[1];
                 }
                 this.uploadFile(fileName); //calling uploadFile with passing file name as an argument
             }

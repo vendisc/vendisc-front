@@ -31,7 +31,8 @@ export default {
     },
     getters: {
         capacityRatio(state, getters) {
-            return (state.usedCapacity / getters.capacity).toFixed(2) || 0
+            const ratio = (state.usedCapacity / getters.capacity).toFixed(2)
+            return (ratio >= 1 || ratio < 0 ? 1 : ratio) || 0
         }
     }
 }

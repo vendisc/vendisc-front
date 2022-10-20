@@ -17,9 +17,9 @@
             <template #tbody>
                 <vs-tr :key="i" v-for="(tr, i) in list" :data="tr" :is-selected="selected == tr" @dblclick.native="open(tr)">
                     <vs-td style="position: relative">
-                        <box-icon style="position: absolute; bottom:14px" type='solid' :name='getFileTypeIcon(tr.type)'
+                        <box-icon style="position: absolute; top:50%; transform: translateY(-50%);" type='solid' :name='getFileTypeIcon(tr.type)'
                             color="grey" size="1.3rem"></box-icon>
-                        <span style="padding-left: 28px">{{ tr.name }}</span>
+                        <span class="table-span">{{ tr.name }}</span>
                     </vs-td>
                     <vs-td>
                         {{ calculateSize(tr.size) }}
@@ -98,4 +98,17 @@ export default {
         height 400px
         overflow hidden
         margin-bottom 28px
+
+
+    .table-span
+        display block
+        padding-left 28px
+        white-space nowrap
+        overflow hidden
+        line-height normal
+
+        &:hover 
+            white-space normal 
+            
+        
 </style>
