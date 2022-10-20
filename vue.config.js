@@ -1,6 +1,7 @@
 const { defineConfig } = require('@vue/cli-service')
+const PUBLIC_PATH = '/views'
 module.exports = defineConfig({
-  publicPath: '/views',
+  publicPath: PUBLIC_PATH,
   transpileDependencies: true,
   devServer: {
     proxy: {

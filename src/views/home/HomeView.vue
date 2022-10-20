@@ -39,7 +39,6 @@ import TopBar from './components/TopBar/TopBar.vue'
 import UploadDialog from './components/UploadDialog/UploadDialog.vue'
 import { reqRenameFile, reqRenameFolder, reqCreateFolder, reqRemoveFile, reqRemoveFolder } from '@/api'
 import { nameValidator, validate } from '@/utils/validator'
-import {SERVER_URL} from '@/api/server'
 
 export default {
     components: {
@@ -99,7 +98,7 @@ export default {
         },
 
         download() {
-            const url = SERVER_URL + this.selectedItem.url
+            const url = this.selectedItem.url
             const fileName = this.selectedItem.name
             var x = new XMLHttpRequest();
             x.open("GET", url, true);
@@ -115,7 +114,7 @@ export default {
         },
 
         copyUrl() {
-            const url = SERVER_URL + this.selectedItem.url
+            const url = this.selectedItem.url
             this.$copyText(url).then(() => {
                 console.log("copy right:" + url)
                 this.$vs.notification({

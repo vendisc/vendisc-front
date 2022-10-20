@@ -2,8 +2,8 @@ import axios from 'axios'
 import nProgress from 'nprogress';
 import store from '@/store'
 import router from '@/router'
-
-const ConfigBaseURL = '/api'
+import { SERVER_URL } from '@/api/server';
+const ConfigBaseURL = SERVER_URL + '/api'
 
 const request = axios.create({
     timeout: 10000, // 请求超时时间

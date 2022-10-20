@@ -42,8 +42,8 @@
 
 <script>
 import { calculateSize } from '@/utils/calc'
+import { SERVER_URL } from '@/api/server';
 export default {
-
     data: () => ({
         uploadedAreaClass: '',
         progressHtml: '',
@@ -88,7 +88,7 @@ export default {
             this.uploadingList.unshift(newTask)
 
             let xhr = new XMLHttpRequest(); //creating new xhr object (AJAX)
-            xhr.open("POST", "/api/file/upload"); //sending post request to the specified URL
+            xhr.open("POST", `${SERVER_URL}/api/file/upload`); //sending post request to the specified URL
             xhr.setRequestHeader('Authorization', this.$store.state.user.token);
             xhr.setRequestHeader('lid', this.$store.getters.curLid);
             xhr.upload.addEventListener("progress", ({ loaded, total }) => {
