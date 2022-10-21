@@ -1,6 +1,6 @@
 <template>
     <vs-dialog v-model="active" blur>
-        <FileUploader></FileUploader>
+        <FileUploader ref="fileUploader"></FileUploader>
     </vs-dialog>
 </template>
 
@@ -13,6 +13,9 @@ export default {
     watch: {
         active(val) {
             this.$emit('update:show', val)
+            if(!val) {
+                this.$refs.fileUploader.abortAllTask()
+            }
         },
         show(val) {
             this.active = val

@@ -14,6 +14,7 @@ import ErrorAlert from '@/components/Alert/ErrorAlert.vue'
 import MyInput from '@/components/MyInput/MyInput.vue'
 import MyDialog from '@/components/MyDialog/MyDialog.vue'
 import FileUploader from '@/components/FileUploader/FileUploader.vue'
+import MyProgress from '@/components/MyProgress/MyProgress.vue'
 
 
 Vue.config.productionTip = false
@@ -23,6 +24,7 @@ Vue.component('ColDivider', ColDivider)
 Vue.component('ErrorAlert', ErrorAlert)
 Vue.component('MyInput', MyInput)
 Vue.component('MyDialog', MyDialog)
+Vue.component('MyProgress', MyProgress)
 Vue.component('FileUploader', FileUploader)
 
 Vue.use(Vuesax, {})

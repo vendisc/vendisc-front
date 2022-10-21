@@ -1,11 +1,13 @@
 <template>
     <div id="home-view">
         <TopBar @refresh="loadData"></TopBar>
-        <FileTable :list="files" :selectedItem.sync="selectedItem" @openFolder="openFolder" @handleCopyUrl="copyUrl"></FileTable>
+        <FileTable :list="files" :selectedItem.sync="selectedItem" @openFolder="openFolder" @handleCopyUrl="copyUrl">
+        </FileTable>
         <SmartBar :selectedType="selectedType" @clear="clearSelected" @refresh="loadData" @openFolder="openFolder"
             @handleDelete="removeDialog = true" @handleRename="renameDialog = true;renameInput = selectedItem.name"
             @handleCreateFolder="folderDialog = true; folderInput=''" @handleCopyUrl="copyUrl"
-            @handleDownload="download" @handleUploadFile="uploadDialog = true">
+            @handleDownload="download" @handleUploadFile="uploadDialog = true" :downloading="downloading"
+            :downloadFilename="downloadFilename" :downloadRatio="downloadRatio" @abortTask="abortDownload">
         </SmartBar>
 
         <MyDialog :show.sync="folderDialog" title="Input new name" @handleOk="createFolder"
@@ -39,6 +41,7 @@ import TopBar from './components/TopBar/TopBar.vue'
 import UploadDialog from './components/UploadDialog/UploadDialog.vue'
 import { reqRenameFile, reqRenameFolder, reqCreateFolder, reqRemoveFile, reqRemoveFolder } from '@/api'
 import { nameValidator, validate } from '@/utils/validator'
+import { SERVER_URL } from '@/api/server'
 
 export default {
     components: {
@@ -71,13 +74,22 @@ export default {
         folderInput: '',
         folderInputError: false,
         folderInputErrorMsg: '',
-        createFolderLoading: false
+        createFolderLoading: false,
+
+        downloadRatio: 0,
+        downloading: false,
+        downloadFilename: '',
+        downloadTaskXhr: null,
+
+        audio: null
     }),
     async created() {
         try {
             await this.loadUserInfo()
             await this.$store.dispatch('getUsedCapacity')
             await this.loadData()
+            this.audio = new Audio()
+            this.audio.src = `${SERVER_URL}/sound/download_finish.mp3`
         } catch (error) {
             console.error(error)
         }
@@ -98,34 +110,52 @@ export default {
         },
 
         download() {
+            if (this.downloading) {
+                this.errorNotification('The current task is not completed')
+                return
+            }
             const url = this.selectedItem.url
             const fileName = this.selectedItem.name
-            var x = new XMLHttpRequest();
+            this.downloading = true
+            this.downloadFilename = fileName
+
+            let x = new XMLHttpRequest();
+            this.downloadTaskXhr = x;
             x.open("GET", url, true);
             x.responseType = 'blob';
             x.onload = function () {
-                var url = window.URL.createObjectURL(x.response)
-                var a = document.createElement('a');
+                let url = window.URL.createObjectURL(x.response)
+                let a = document.createElement('a');
                 a.href = url
                 a.download = fileName;
                 a.click()
             }
+            x.addEventListener("progress", ({ loaded, total }) => {
+                this.downloadRatio = Math.floor((loaded / total) * 100);
+
+                if (loaded == total) {
+                    this.downloading = false
+                    this.downloadRatio = 0
+                    this.audio.play()
+                    this.successNotification(`File download complete`)
+                    this.downloadTaskXhr = null
+                }
+            })
             x.send();
+        },
+
+        abortDownload() {
+            this.downloading = false
+            this.downloadRatio = 0
+            this.downloadTaskXhr.abort()
+            this.downloadTaskXhr = null
         },
 
         copyUrl() {
             const url = this.selectedItem.url
             this.$copyText(url).then(() => {
                 console.log("copy right:" + url)
-                this.$vs.notification({
-                    icon: `<box-icon name='select-multiple' color='white'></box-icon>`,
-                    color: 'success',
-                    position: 'top-center',
-                    // progress: 'auto',
-                    duration: 1800,
-                    title: 'Success',
-                    text: `The link has been copied to the clipboard`
-                })
+                this.successNotification(`The link has been copied to the clipboard`)
             }, () => {
                 console.error("copy error")
             })
@@ -225,6 +255,17 @@ export default {
                 title: "Error",
                 text: text
             });
+        },
+        successNotification(text) {
+            this.$vs.notification({
+                icon: `<box-icon name='select-multiple' color='white'></box-icon>`,
+                color: 'success',
+                position: 'top-center',
+                // progress: 'auto',
+                duration: 1800,
+                title: 'Success',
+                text: text
+            })
         }
     },
 
@@ -243,7 +284,7 @@ export default {
         },
 
         uploadDialog(val) {
-            if(!val) {
+            if (!val) {
                 this.loadData()
                 this.$store.dispatch('getUsedCapacity')
             }

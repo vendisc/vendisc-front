@@ -51,6 +51,14 @@ export default {
         uploadedList: []
     }),
     methods: {
+        abortAllTask() {
+            this.uploadingList.forEach(task => {
+                if(!task.finished) {
+                    task.xhr.abort();
+                }
+            })
+        }, 
+
         handleFormClick() {
             this.$refs.fileInput.click()
         },
@@ -80,29 +88,29 @@ export default {
         },
 
         uploadFile(name) {
+            let xhr = new XMLHttpRequest();
+
             const newTask = {
                 uploadingName: name,
                 uploadingRatio: 0,
                 finished: false,
                 fileSize: null,
+                xhr
             }
-
             let finishedTask = null;
-
             this.uploadingList.unshift(newTask)
 
-            let xhr = new XMLHttpRequest(); //creating new xhr object (AJAX)
-            xhr.open("POST", `${SERVER_URL}/api/file/upload`); //sending post request to the specified URL
+            xhr.open("POST", `${SERVER_URL}/api/file/upload`);
             xhr.setRequestHeader('Authorization', this.$store.state.user.token);
             xhr.setRequestHeader('lid', this.$store.getters.curLid);
             xhr.upload.addEventListener("progress", ({ loaded, total }) => {
-                let fileLoaded = Math.floor((loaded / total) * 100);  //getting percentage of loaded file size
+                let fileLoaded = Math.floor((loaded / total) * 100);
 
                 newTask.uploadingRatio = fileLoaded
 
                 this.uploadedAreaClass = 'onprogress';
                 if (loaded == total) {
-                    let fileTotal = Math.floor(total / 1000); //gettting total file size in KB from bytes
+                    let fileTotal = Math.floor(total / 1000);
                     newTask.finished = true;
                     finishedTask = {
                         name,
@@ -114,7 +122,7 @@ export default {
 
             })
             xhr.addEventListener('readystatechange', () => {
-                if (xhr.readyState === 4) {
+                if (xhr.readyState === 4 && xhr.response) {
                     const res = JSON.parse(xhr.response);
                     if (res.code <= 0) {
                         this.uploadedList.splice(this.uploadedList.indexOf(finishedTask), 1);
@@ -130,8 +138,8 @@ export default {
                     }
                 }
             })
-            let data = new FormData(this.$refs.form); //FormData is an object to easily send form data
-            xhr.send(data); //sending form data
+            let data = new FormData(this.$refs.form);
+            xhr.send(data);
         }
     }
 }
