@@ -5,7 +5,7 @@
       borderColor: waveColor,
     }">
         <canvas id="canvas"></canvas>
-        <p :style="{fontSize,color: fontColor}" class="value">{{ rate * 100 }}%</p>
+        <p :style="{fontSize,color: fontColor}" class="value">{{ (rate * 100).toFixed(0) }}%</p>
     </div>
 </template>
     
